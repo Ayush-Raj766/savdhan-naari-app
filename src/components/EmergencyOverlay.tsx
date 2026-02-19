@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '@/store/useStore';
 import { motion } from 'framer-motion';
@@ -13,17 +14,19 @@ const EmergencyOverlay = ({ onCancel, onExpire }: EmergencyOverlayProps) => {
   const [pin, setPin] = useState('');
   const [status, setStatus] = useState<'countdown' | 'cancelled' | 'sending'>('countdown');
   const store = useStore();
+  const onExpireRef = useRef(onExpire);
+  onExpireRef.current = onExpire;
 
   useEffect(() => {
     if (status !== 'countdown') return;
     if (seconds <= 0) {
       setStatus('sending');
-      onExpire();
+      onExpireRef.current();
       return;
     }
     const timer = setTimeout(() => setSeconds((s) => s - 1), 1000);
     return () => clearTimeout(timer);
-  }, [seconds, status, onExpire]);
+  }, [seconds, status]);
 
   const handlePinSubmit = () => {
     // Mock PIN check — in production, validate against user's stored PIN
@@ -150,5 +153,4 @@ const EmergencyOverlay = ({ onCancel, onExpire }: EmergencyOverlayProps) => {
   );
 };
 
-import { useState, useEffect } from 'react';
 export default EmergencyOverlay;
